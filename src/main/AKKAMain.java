@@ -6,20 +6,53 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 
+/**
+ * AKKA system in which we can create nodes, and add children or neighbors to them 
+ * @author Badreddine & Cojez
+ *
+ */
 public class AKKAMain {
+	
+	//FIELDS
 	protected ActorSystem system;
 
+	//METHODS
+	
+	/**
+	 * Constructor of AKKAMain class
+	 * @param systemName the name of the system
+	 */
 	public AKKAMain(String systemName) {
 		super();
 		system = ActorSystem.create(systemName);
 		System.out.println("created \"" + system.name() + "\" system");
 	}
 
+	/**
+	 * Creates a node in the system then returns it
+	 * @param name the name of the node
+	 * @return the created node
+	 */
 	public ActorRef createNode(String name) {
 		System.out.println("created \"" + name + "\" node in system \"" + system.name() + "\"");
 		return system.actorOf(Props.create(Node.class, name), name);
 	}
 	
+	/**
+	 * Shuts down the system
+	 */
+	public void shutdown(){		
+		system.shutdown();
+		System.out.println("closed \"" + system.name() + "\" system");
+	}
+
+	//STATIC METHODS
+	
+	/**
+	 * Adds the child node to the parent node
+	 * @param parent the parent node
+	 * @param child the child node
+	 */
 	public static void addChild(ActorRef parent, ActorRef child) {
 		if (parent == null) {
 			System.err.println("can't add child, given parent is null");
@@ -32,6 +65,11 @@ public class AKKAMain {
 		System.out.println("sent message to add child");
 	}
 	
+	/**
+	 * Creates an edge between the two nodes
+	 * @param node1 the first node
+	 * @param node2 the second node
+	 */
 	public static void addNeighbour(ActorRef node1, ActorRef node2) {
 		if (node1 == null) {
 			System.err.println("can't add edge, node1 is null");
@@ -46,11 +84,20 @@ public class AKKAMain {
 		System.out.println("2/2 -- sent message to node2 to add node1");
 	}
 
-	public void shutdown(){		
-		system.shutdown();
-		System.out.println("closed \"" + system.name() + "\" system");
+	/**
+	 * Waits for the user to press Enter in console
+	 * @throws IOException
+	 */
+	public static void waitInput() throws IOException {
+		System.out.println(">>Press enter to continue");
+		System.in.read();
 	}
-
+	
+	/**
+	 * Method used to test the AKKAMain class
+	 * @param args
+	 * @throws IOException
+	 */
 	public static void main(String[] args) throws IOException {
 		ActorRef noeud1, noeud2, noeud3, noeud4, noeud5, noeud6;
 		AKKAMain system1, system2;
@@ -126,8 +173,4 @@ public class AKKAMain {
 		system2.shutdown();
 	}
 
-	public static void waitInput() throws IOException {
-		System.out.println(">>Press enter to continue");
-		System.in.read();
-	}
 }
