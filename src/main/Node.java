@@ -9,17 +9,14 @@ import akka.actor.UntypedActor;
 public class Node extends UntypedActor {
 
 	protected List<ActorRef> children;
-	protected ActorRef parent;
 	protected String who;
 
 	public Node(String who) {
 		this.who = who;
-		this.parent = ActorRef.noSender();
 		this.children = new LinkedList<ActorRef>();
 	}
 
 	public Node(ActorRef parent, List<ActorRef> childs, String who) {
-		this.parent = parent;
 		this.children = childs;
 	}
 
@@ -29,18 +26,16 @@ public class Node extends UntypedActor {
 		}
 	}
 
-	public void sendMessageToParent(GreetingsMessage message) {
-		if (parent != null)
-			parent.tell(message, getSelf());
-	}
-
 	@Override
 	public void onReceive(Object message) throws InterruptedException {
 		if (message instanceof GreetingsMessage) {
 			GreetingsMessage greetingsMessage = (GreetingsMessage) message;
-			System.out.println(this.who + " received \"" + greetingsMessage + "\"");
-			sendMessageToChildren(greetingsMessage);
-			// sendMessageToParent(message);
+			if (!greetingsMessage.hasAlreadyVisited(getSelf())) {
+				System.out.println(this.who + " received \"" + greetingsMessage
+						+ "\"");
+				((GreetingsMessage) message).addToVisited(getSelf());
+				sendMessageToChildren(greetingsMessage);
+			}
 			return;
 		}
 

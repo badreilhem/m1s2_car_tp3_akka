@@ -2,7 +2,6 @@ package main;
 
 import java.io.IOException;
 
-import scala.io.StdIn;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
@@ -32,16 +31,26 @@ public class AKKAMain {
 		parent.tell(new AddChildMessage(child), parent);
 		System.out.println("sent message to add child");
 	}
+	
+	public static void addNeighbour(ActorRef node1, ActorRef node2) {
+		if (node1 == null) {
+			System.err.println("can't add edge, node1 is null");
+		}
+		if (node2 == null) {
+			System.err.println("can't add edge, node2 is null");
+		}
+
+		node1.tell(new AddChildMessage(node2), node1);
+		System.out.println("1/2 -- sent message to node1 to add node2");
+		node2.tell(new AddChildMessage(node1), node2);
+		System.out.println("2/2 -- sent message to node2 to add node1");
+	}
 
 	public void shutdown(){		
 		system.shutdown();
 		System.out.println("closed \"" + system.name() + "\" system");
 	}
 
-	/**= 
-	 * @param args
-	 * @throws IOException 
-	 */
 	public static void main(String[] args) throws IOException {
 		ActorRef noeud1, noeud2, noeud3, noeud4, noeud5, noeud6;
 		AKKAMain system1, system2;
@@ -95,6 +104,23 @@ public class AKKAMain {
 		noeud2.tell(new GreetingsMessage("message from noeud 2"), ActorRef.noSender());
 		waitInput();
 
+		//////////////////////////////////////////////////////////
+		
+		//Q5
+		//We add an edge between the nodes 4 and 6
+		addNeighbour(noeud4, noeud6);
+		waitInput();
+
+		//sends a message to the node 1
+		//all the nodes should receive this message ONLY ONCE
+		noeud1.tell(new GreetingsMessage("message from noeud 1"), ActorRef.noSender());
+		waitInput();
+
+		//sends a message to the node 2
+		//nodes 2, 3, 4 and 6 should receive this message
+		noeud2.tell(new GreetingsMessage("message from noeud 2"), ActorRef.noSender());
+		waitInput();
+				
 		//shuts down the two systems
 		system1.shutdown();
 		system2.shutdown();
